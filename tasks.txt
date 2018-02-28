@@ -1,0 +1,5 @@
+Resize images + greyscale + remove borders text 2: Valentin + Christopher
+transform images to get a more equal  distribution 2: Tristan and Mathis
+Setup the pipeline (already make predictions) 1: Adam
+diagram for gido 1: Jelmer
+Do research, find articles/ideas/algorithms 1: Theo

@@ -1,0 +1,8 @@
+name: humpBack-env
+dependencies:
+- python=3
+- numpy
+- pandas
+- keras
+- matplotlib
+- scipy

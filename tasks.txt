@@ -1,5 +1,16 @@
-Resize images + greyscale + remove borders text 2: Valentin + Christopher
-transform images to get a more equal  distribution 2: Tristan and Mathis
+Resize images + greyscale + remove borders text 2: Valentin + Christopher 
+transform images to get a more equal  distribution 2: Tristan and Mathis (done)
 Setup the pipeline (already make predictions) 1: Adam
-diagram for gido 1: Jelmer
+diagram for gido 1: Jelmer (done)
 Do research, find articles/ideas/algorithms 1: Theo
+
+
+Preprossesing: 
+Crop to only tail.
+Imagine rotation.
+
+Binary mask: Valentin + Theo
+Clustering algorthm: christopher
+Color: RGB, saturation/hue classification? Can we use this? Jelmer
+K-means, a variation? christopher
+Edge-detection. Tristan

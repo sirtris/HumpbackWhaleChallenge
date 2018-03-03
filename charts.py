@@ -71,6 +71,8 @@ def main():
     heigth_test = np.array([x[1] for x in testsizes])
     print('Average training data image dimensions: (' + str(int(breadth_train.mean())) + ',' + str(int(heigth_train.mean()))+ ')')
     print('Average test data image dimensions: (' + str(int(breadth_test.mean())) + ',' + str(int(heigth_test.mean()))+ ')')
+    print('Average training data standard deviation for image dimensions: (' + str(int(breadth_train.std())) + ',' + str(int(heigth_train.std()))+ ')')
+    print('Average test data standard deviation for image dimensions: (' + str(int(breadth_test.std())) + ',' + str(int(heigth_test.std()))+ ')')
 
     #plot the train image sizes
     plt.plot(range(0,train_size),sorted([x[0] * x[1] for x in trainsizes]))

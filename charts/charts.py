@@ -7,6 +7,7 @@ import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import matplotlib.pyplot as plt
 import os
 from PIL import Image
+import colorsys
 import matplotlib.image as mpimg
 import random
 import collections as co
@@ -14,8 +15,6 @@ import scipy as sp
 import copy
 
 def import_data():
-
-
     return 0
 
 def main():
@@ -38,13 +37,13 @@ def main():
     plt.title('Class size distribution in the training set')
     plt.xlabel('classes')
     plt.ylabel('size')
-    plt.savefig('charts/class_sizes.png');plt.clf()
+    plt.savefig('class_sizes.png');plt.clf()
     #Plot nr of images per category without "New whale"
     plt.plot(range(0,unique_ids-1),sorted(class_sizes)[:-1])
     plt.title('Class size distribution in the training set without "New whale"')
     plt.xlabel('classes')
     plt.ylabel('size')
-    plt.savefig('charts/class_sizes2.png');plt.clf()
+    plt.savefig('class_sizes2.png');plt.clf()
 
     #Plot logarithmic distribution of images per category
     idCountFrame["density"] = idCountFrame["numImages"] / np.sum(idCountFrame["numImages"])
@@ -55,7 +54,7 @@ def main():
     plt.xlabel("$\log(Rank)$")
     plt.ylabel("Density")
     plt.title("$\log(Rank)$-Density Plot for Labels")
-    plt.savefig('charts/density.png');plt.clf()
+    plt.savefig('density.png');plt.clf()
 
     #Get the image sizes of the data and print the largest, smallest and average image size
     trainsizes = [];testsizes = []
@@ -79,17 +78,13 @@ def main():
     plt.title('Image size distribution in the training set')
     plt.xlabel('images')
     plt.ylabel('size(pixels)')
-    plt.savefig('charts/imagesizetrain.png');plt.clf()
+    plt.savefig('imagesizetrain.png');plt.clf()
     #plot the test train image sizes
     plt.plot(range(0,test_size),sorted([x[0] * x[1] for x in testsizes]))
     plt.title('Image size distribution in the test set')
     plt.xlabel('images')
     plt.ylabel('size (pixels)')
-    plt.savefig('charts/imagesizetest.png');plt.clf()
-
-    #Import the data
-    dataset = import_data()
-
+    plt.savefig('imagesizetest.png');plt.clf()
 
 if (__name__ == '__main__'):
     main()

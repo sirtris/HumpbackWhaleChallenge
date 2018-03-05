@@ -6,14 +6,24 @@ from PIL import Image
 import scipy
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn import metrics
+import pandas as pd
+import random
+import matplotlib.image as mpimg
 
 
 
 import os
-dir = os.path.dirname(__file__)
-filename = dir + "/data/train/"
+#dir = os.path.dirname(__file__)
+#filename = dir + "/data/train/"
+#
+#img_file = Image.open(filename + "e9162eee.jpg")
+#img = img_file.load()
 
-img_file = Image.open(filename + "e9162eee.jpg")
+train_data = pd.read_csv('data/train.csv')
+
+filename = os.path.join('data/train', train_data.Image[random.randrange(0,9850)])
+
+img_file = Image.open(filename)
 img = img_file.load()
 
 [width, height] = img_file.size
@@ -36,6 +46,10 @@ if cl == "kmeans":
     Y = kmeans.predict(X)
     print(Y)
     Y = np.transpose(np.reshape(Y, (width,height)))
+    plt.figure()
+    plt.subplot(1,2,1)
+    plt.imshow(mpimg.imread(filename))
+    plt.subplot(1,2,2)
     plt.imshow(Y)
     plt.show()
 
@@ -78,17 +92,17 @@ if cl == "DBSCAN":
 # do the actual cropping:
 
 # find the boundaries of the whale tail:
-
-left = 999999
-right = 0
-top = 999999
-bottom = 0
-for row in Y:
-    row = list(row)
-    if row.index(1) < left:
-        left = row.index(1)
-    row = list(reversed(row))
-    if row.index(1) < right:
-        right = row.index(1)
-
-print(left, right)
+#
+#left = 999999
+#right = 0
+#top = 999999
+#bottom = 0
+#for row in Y:
+#    row = list(row)
+#    if row.index(1) < left:
+#        left = row.index(1)
+#    row = list(reversed(row))
+#    if row.index(1) < right:
+#        right = row.index(1)
+#
+#print(left, right)

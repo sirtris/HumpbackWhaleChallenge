@@ -1,8 +1,15 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+import pandas as pd
+import os
+import random
 
-img = cv2.imread('./data/train/ff38054f.jpg',0)
+
+train_data = pd.read_csv('data/train.csv')
+filename = os.path.join('data/train', train_data.Image[random.randrange(0,9850)])
+
+img = cv2.imread(filename,0)
 
 def auto_canny(img, sigma=0.33):
 	# compute the median of the single channel pixel intensities

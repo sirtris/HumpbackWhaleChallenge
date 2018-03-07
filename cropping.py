@@ -14,15 +14,15 @@ import matplotlib.image as mpimg
 
 import os
 #dir = os.path.dirname(__file__)
-#filename = dir + "/data/train/"
-#
-#img_file = Image.open(filename + "e9162eee.jpg")
+#filename = dir + "/data/train/" + "e9162eee.jpg"
+
+#img_file = Image.open(filename + "fa62a2e8.jpg")
 #img = img_file.load()
 
 train_data = pd.read_csv('data/train.csv')
 
 filename = os.path.join('data/train', train_data.Image[random.randrange(0,9850)])
-
+#
 img_file = Image.open(filename)
 img = img_file.load()
 
@@ -38,20 +38,20 @@ X = np.array(X)
 
 # ----------- Trying different clustering techniques: -----------------#
 cl = "kmeans"
+nr_clusters = 2
 Y = []
 # K-means
 if cl == "kmeans":
-    kmeans = KMeans(n_clusters=2, random_state=0).fit(X)
+    kmeans = KMeans(n_clusters=nr_clusters, random_state=0).fit(X)
     print(kmeans.cluster_centers_)
     Y = kmeans.predict(X)
     print(Y)
     Y = np.transpose(np.reshape(Y, (width,height)))
     plt.figure()
-    plt.subplot(1,2,1)
+    plt.subplot(2,2,1)
     plt.imshow(mpimg.imread(filename))
-    plt.subplot(1,2,2)
+    plt.subplot(2,2,2)
     plt.imshow(Y)
-    plt.show()
 
 if cl == "DBSCAN":
     db = DBSCAN(eps=0.3, min_samples=10).fit(X)
@@ -106,3 +106,45 @@ if cl == "DBSCAN":
 #        right = row.index(1)
 #
 #print(left, right)
+
+# nearest neighbour via majority vote
+window = 1
+print(Y)
+copy = np.zeros(shape=(len(Y),len(Y[0])))
+for index_row, row in enumerate(Y):
+    for index_col, col in enumerate(row):
+        votes = [0] * nr_clusters
+        for x in range(-window, window):
+            for y in range(-window, window):
+                if index_row + x < 0 or index_col + y < 0 or index_col + y >= len(row) or index_row + x >= len(Y):
+                    continue
+                else:
+                    votes[Y[index_row + x][index_col + y]] += 1
+                
+#        print(index_row)        
+#        Y[index_row][index_col] = votes.index(max(votes))
+        copy[index_row][index_col] = votes.index(max(votes))
+        
+plt.subplot(2,2,3)
+plt.imshow(copy)
+
+# do it a second time to smooth it out even more:
+copy2 = np.zeros(shape=(len(copy),len(copy[0])))
+for index_row, row in enumerate(copy):
+    for index_col, col in enumerate(copy):
+        votes = [0] * nr_clusters
+        for x in range(-window, window):
+            for y in range(-window, window):
+                if index_row + x < 0 or index_col + y < 0 or index_col + y >= len(row) or index_row + x >= len(copy):
+                    continue
+                else:
+                    votes[int(copy[index_row + x][index_col + y])] += 1
+                
+#        print(index_row)        
+#        Y[index_row][index_col] = votes.index(max(votes))
+        copy2[index_row][index_col] = votes.index(max(votes))
+        
+plt.subplot(2,2,4)
+plt.imshow(copy)
+plt.show()
+

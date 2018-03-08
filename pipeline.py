@@ -2,10 +2,10 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-from keras.preprocessing.image import (
-    random_rotation, random_shift, random_shear, random_zoom,
-    random_channel_shift, transform_matrix_offset_center, img_to_array)
-from PIL import Image
+#from keras.preprocessing.image import (
+#    random_rotation, random_shift, random_shear, random_zoom,
+#    random_channel_shift, transform_matrix_offset_center, img_to_array)
+#from PIL import Image
 
 train_df = pd.read_csv('./data/train.csv')
 
@@ -18,13 +18,8 @@ test = os.listdir('data/test')
 train_dir = 'data/train/'
 test_dir = 'data/test/'
 
-
-## For testing purposes
-# test dir
-t = os.listdir('test')
-t1 = 'test/'
 # For resizing
-idealWidth = 1050
+idealWidth = 1050   
 idealHeight = 600
 
 
@@ -39,10 +34,28 @@ def augment_images(files, directory):
         #img = img.rotate(30, Image.NEAREST)
 
         # image = shear(image)
-        # image = shfit(image)
+        # image = shift(image)
         # other transformations
 
         img.save('altered/' + image, "JPEG")
 
+def fakeClassify1():
+    solution = []
+    for i in range(0,len(train_df)):
+        imagename = train_df.Image[i]
+        entry = [imagename, train_df.Id[i]]
+        solution.append(entry)
+    return solution
 
-augment_images(t, t1)
+def combine(solutions):
+    s = solutions.pop(0)
+    result = np.array(s)
+    for s in solutions:
+        m = np.array([col[1] for col in s]) # array of second column of s
+        result = np.append(result,np.reshape(m,(m.size,1)), axis=1) # add m to result
+    return result
+    
+# augment_images(train, traindir)
+s1 = classify1()
+s2 = s1
+print(combine([s1,s2]))

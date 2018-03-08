@@ -7,6 +7,7 @@ from skimage.color import rgb2gray
 from skimage import exposure
 from skimage import filters
 from skimage import io
+from skimage.filters import try_all_threshold
 
 train_data = pd.read_csv('data/train.csv')
 
@@ -29,5 +30,8 @@ plt.plot(bins_center, hist, lw=2)
 plt.axvline(val, color='k', ls='--')
 
 plt.tight_layout()
+
+fig, ax = try_all_threshold(image, figsize=(10, 8), verbose=False)  
+
 plt.show()
 

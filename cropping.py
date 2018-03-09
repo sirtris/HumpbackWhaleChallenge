@@ -10,6 +10,7 @@ import pandas as pd
 import random
 import matplotlib.image as mpimg
 import os
+import scipy.misc
 
 dir = os.path.dirname(__file__)
 #filename = dir + "/data/train/"
@@ -19,8 +20,8 @@ dir = os.path.dirname(__file__)
 
 train_data = pd.read_csv(dir + '/data/train.csv')
 
-# filename = os.path.join(dir + '/data/train', train_data.Image[random.randrange(0, 9850)])
-filename = os.path.join(dir + '/data/train', "ddba0df3.jpg")
+filename = os.path.join(dir + '/data/train', train_data.Image[random.randrange(0, 9850)])
+# filename = os.path.join(dir + '/data/train', "ddba0df3.jpg")
 print("file:", filename)
 
 img_file = Image.open(filename)
@@ -43,9 +44,8 @@ Y = []
 # K-means
 if cl == "kmeans":
     kmeans = KMeans(n_clusters=nr_clusters, random_state=0).fit(X)
-    print(kmeans.cluster_centers_)
+    print("clusters:", kmeans.cluster_centers_)
     Y = kmeans.predict(X)
-    print(Y)
     Y = np.transpose(np.reshape(Y, (width, height)))
     plt.figure()
     plt.subplot(2, 2, 1)
@@ -107,8 +107,8 @@ if cl == "DBSCAN":
 # print(left, right)
 
 # nearest neighbour via majority vote
-window = 1
-print(Y)
+"""
+window = 3
 copy = np.zeros(shape=(len(Y), len(Y[0])))
 for index_row, row in enumerate(Y):
     for index_col, col in enumerate(row):
@@ -124,7 +124,7 @@ for index_row, row in enumerate(Y):
         #        Y[index_row][index_col] = votes.index(max(votes))
         copy[index_row][index_col] = votes.index(max(votes))
 
-plt.subplot(2, 2, 3)
+plt.subplot(3, 2, 3)
 plt.imshow(copy)
 
 # do it a second time to smooth it out even more:
@@ -143,22 +143,45 @@ for index_row, row in enumerate(copy):
         #        Y[index_row][index_col] = votes.index(max(votes))
         copy2[index_row][index_col] = votes.index(max(votes))
 
-plt.subplot(2, 2, 4)
+plt.subplot(3, 2, 4)
 plt.imshow(copy2)
 #plt.show()
+Y = copy2
+"""
 # note: smoothing seems to work, but it does not really make the distinction between tail and not tail better. It
-# remains questionable if we should really use that.
+# remains questionable if we should really use that. Especially because it takes forever to run.
 
 # Find the biggest area of one color:
-Y = copy2
+
 resp = np.zeros(shape=(len(Y), len(Y[0])))
 
+
+def mark_group2(row, col, val, group_nr):
+    frontier = list()
+    frontier.append([row, col])
+    while not frontier == []:
+        [r, c] = frontier.pop(0)
+        if r < 0 or r >= len(Y) or c < 0 or c >= len(Y[0]):
+            continue
+        if resp[r, c] != 0:
+            continue
+        if Y[r, c] != val:
+            continue
+        resp[r, c] = group_nr
+        frontier.append([r + 1, c])
+        frontier.append([r, c + 1])
+        frontier.append([r - 1, c])
+        frontier.append([r, c - 1])
+
+
 def mark_group(row, col, val, group_nr):
+    # recursive function to color the groups. Since the max recursion depth from python is easily exceeded, use
+    # the other version
     if row < 0 or row >= len(Y) or col < 0 or col >= len(Y[0]):
         return
     if resp[row, col] != 0:
         return
-    if Y[row,col] == val:
+    if Y[row, col] == val:
         # mark the actual position
         resp[row,col] = group_nr
         # mark all the neigbours
@@ -173,14 +196,17 @@ for index_row, row in enumerate(Y):
         if resp[index_row][index_col] == 0:
             # if that cell is not assigned a group yet, assign it to one:
             group_val = Y[index_row][index_col]
-            mark_group(index_row, index_col, group_val, area)
+            mark_group2(index_row, index_col, group_val, area)
             area += 1
 
-out = open("bigfile.txt", 'w')
-for line in resp:
-    for val in line:
-        out.write(str(int(val)) + " ")
-    out.write("\n")
+# ASSUMPTION: the pixel at the top left of the initial picture is not the whale tail.
+water = Y[0,0]
+for index_row, row in enumerate(Y):
+    for index_col, col in enumerate(row):
+        if Y[index_row, index_col] == water:
+            resp[index_row, index_col] = 1
+
+
     #print(line)
 
 # now we have a representation of all distinctive fields of the clustering results. Look in "bigfile.txt to see it;
@@ -193,7 +219,70 @@ for row in resp:
         else:
             area_dict[str(val)] = 1
 
-print(list(sorted(area_dict.values())))
+# print(list(reversed(sorted(area_dict.values()))))
 
-# From here on we have to identify which area is the whale and crop that out.
+# From here on we have to identify  which area the whale is inside and crop that out.
+# For now, we will assume that the whale tail is the second biggest area:
+whale_id = int(float([key for key in area_dict if area_dict[key] == list(reversed(sorted(area_dict.values())))[1]][0])) # Im sorry for that
+
+print(whale_id)
+
+# update the responsibilities one final time, setting every pixel to 0, except the one from whale_id
+for index_row, row in enumerate(resp):
+    for index_col, col in enumerate(row):
+        if col != int(float(whale_id)):
+            resp[index_row, index_col] = 0.0
+
+plt.subplot(2, 2, 3)
+plt.imshow(resp)
+#plt.show()
+
+# now find the boundaries for the cropped picture:
+left, top = len(Y), len(Y)
+right, bottom = len(Y), len(Y)
+for index_row, row in enumerate(resp):
+    if whale_id not in row:
+        continue
+    l = list(row).index(whale_id)
+    if l < left:
+        left = l
+    r = list(reversed(row)).index(whale_id)
+    if r < right:
+        right = r
+
+t_resp = np.transpose(resp)
+for index_row, row in enumerate(t_resp):
+    if whale_id not in row:
+        continue
+    t = list(row).index(whale_id)
+    if t < top:
+        top = t
+    b = list(reversed(row)).index(whale_id)
+    if b < bottom:
+        bottom = b
+
+right = len(Y[0]) - right
+bottom = len(Y) - bottom
+print(left, right, top, bottom)
+
+cropped_img = np.zeros(shape=(bottom-top, right-left))
+for index_row, row in enumerate(Y[top:bottom]):
+    for index_col, col in enumerate(row[left:right]):
+        cropped_img[index_row, index_col] = col
+
+out = open("bigfile.txt", 'w')
+for line in cropped_img:
+    # print(line[left:right], right-left, len(line[left:right]), line)
+    for val in line:
+        out.write(str(int(val)) + " ")
+    out.write("\n")
+
+plt.subplot(2, 2, 4)
+plt.imshow(cropped_img)
+plt.show()
+
+# The only thing left is to save the cropped image
+
+
+# scipy.misc.toimage(cropped_img).save(dir + "/cropped_img/" + filename.split("\\")[1])
 

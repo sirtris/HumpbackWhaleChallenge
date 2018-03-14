@@ -49,10 +49,6 @@ def fakeClassify1():
         solution.append(entry)
     return solution
 
-def testClassify():
-    c = tc.testClassifier(train_df,train_dir,test_dir)
-    return c.classify()
-
 def combine(solutions):
     s = solutions.pop(0)
     result = np.array(s)

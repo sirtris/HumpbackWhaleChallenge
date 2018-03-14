@@ -2,10 +2,12 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import testClassifier as tc
+
 #from keras.preprocessing.image import (
 #    random_rotation, random_shift, random_shear, random_zoom,
 #    random_channel_shift, transform_matrix_offset_center, img_to_array)
-#from PIL import Image
+from PIL import Image
 
 train_df = pd.read_csv('./data/train.csv')
 
@@ -47,6 +49,10 @@ def fakeClassify1():
         solution.append(entry)
     return solution
 
+def testClassify():
+    c = tc.testClassifier(train_df,train_dir,test_dir)
+    return c.classify()
+
 def combine(solutions):
     s = solutions.pop(0)
     result = np.array(s)
@@ -56,6 +62,6 @@ def combine(solutions):
     return result
     
 # augment_images(train, traindir)
-s1 = classify1()
+s1 = classify1() #testClassify()
 s2 = s1
 print(combine([s1,s2]))

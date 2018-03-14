@@ -20,8 +20,8 @@ dir = os.path.dirname(__file__)
 
 train_data = pd.read_csv(dir + '/data/train.csv')
 
-filename = os.path.join(dir + '/data/train', train_data.Image[random.randrange(0, 9850)])
-# filename = os.path.join(dir + '/data/train', "ddba0df3.jpg")
+#filename = os.path.join(dir + '/data/train', train_data.Image[random.randrange(0, 9850)])
+filename = os.path.join(dir + '/data/train', "f1b24b92.jpg")
 print("file:", filename)
 
 img_file = Image.open(filename)
@@ -113,9 +113,9 @@ if cl == "DBSCAN":
 #        right = row.index(1)
 #
 # print(left, right)
-
-# nearest neighbour via majority vote
 """
+# nearest neighbour via majority vote
+
 window = 3
 copy = np.zeros(shape=(len(Y), len(Y[0])))
 for index_row, row in enumerate(Y):
@@ -131,6 +131,7 @@ for index_row, row in enumerate(Y):
         #        print(index_row)
         #        Y[index_row][index_col] = votes.index(max(votes))
         copy[index_row][index_col] = votes.index(max(votes))
+Y = copy
 
 plt.subplot(3, 2, 3)
 plt.imshow(copy)
@@ -163,7 +164,7 @@ Y = copy2
 
 resp = np.zeros(shape=(len(Y), len(Y[0])))
 
-def mark_group2(row, col, val, group_nr):
+def mark_group2(row, col, group, area):
     frontier = list()
     frontier.append([row, col])
     while not frontier == []:
@@ -172,9 +173,9 @@ def mark_group2(row, col, val, group_nr):
             continue
         if resp[r, c] != 0:
             continue
-        if Y[r, c] != val:
+        if Y[r, c] != group:
             continue
-        resp[r, c] = group_nr
+        resp[r, c] = area
         frontier.append([r + 1, c])
         frontier.append([r, c + 1])
         frontier.append([r - 1, c])
@@ -206,6 +207,12 @@ for index_row, row in enumerate(Y):
             mark_group2(index_row, index_col, group_val, area)
             area += 1
 
+out = open("bigfile.txt", 'w')
+for line in resp:
+    # print(line[left:right], right-left, len(line[left:right]), line)
+    for val in line:
+        out.write(str(int(val)) + "\t")
+    out.write("\n")
 # ASSUMPTION: the pixel at the top left of the initial picture is not the whale tail.
 water = Y[0,0]
 for index_row, row in enumerate(Y):
@@ -236,8 +243,8 @@ whale_id = int(float([key for key in area_dict if area_dict[key] == list(reverse
 if resp[0,0] == whale_id and resp[0,len(resp[0])-1] == whale_id:
     whale_id = int(float([key for key in area_dict if area_dict[key] == list(reversed(sorted(area_dict.values())))[2]][0]))
 
-# if that area makes less than 20% of the image, we chose just the biggest one:
-if area_dict[str(float(whale_id))]/(width*height) < 0.2:
+# if that area makes less than 10% of the image, we chose just the biggest one:
+if area_dict[str(float(whale_id))]/(width*height) < 0.1:
     whale_id = int(
         float([key for key in area_dict if area_dict[key] == list(reversed(sorted(area_dict.values())))[0]][0]))
 print(whale_id)
@@ -285,13 +292,6 @@ cropped_img = np.zeros(shape=(bottom-top, right-left))
 for index_row, row in enumerate(Y[top:bottom]):
     for index_col, col in enumerate(row[left:right]):
         cropped_img[index_row, index_col] = col
-
-out = open("bigfile.txt", 'w')
-for line in cropped_img:
-    # print(line[left:right], right-left, len(line[left:right]), line)
-    for val in line:
-        out.write(str(int(val)) + " ")
-    out.write("\n")
 
 c_img = np.zeros(shape=(bottom-top, right-left, 3))
 

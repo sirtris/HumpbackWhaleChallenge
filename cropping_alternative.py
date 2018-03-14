@@ -20,9 +20,12 @@ dir = os.path.dirname(__file__)
 
 train_data = pd.read_csv(dir + '/data/train.csv')
 
-#filename = os.path.join(dir + '/data/train', train_data.Image[random.randrange(0, 9850)])
-filename = os.path.join(dir + '/data/train', "f1b24b92.jpg")
-print("file:", filename)
+picture_name = train_data.Image[random.randrange(0, 9850)]
+#picture_name = "4e567af1.jpg"
+
+filename = os.path.join(dir + '/data/train', picture_name)
+#filename = os.path.join(dir + '/data/train', "f1b24b92.jpg")
+print("file:", picture_name)
 
 img_file = Image.open(filename)
 img = img_file.load()
@@ -62,6 +65,7 @@ if cl == "kmeans":
     plt.subplot(2, 2, 2)
     plt.title("kmeans prediction")
     plt.imshow(Y)
+    plt.suptitle(picture_name)
 
 if cl == "DBSCAN":
     db = DBSCAN(eps=0.3, min_samples=10).fit(X)
@@ -244,7 +248,7 @@ if resp[0,0] == whale_id and resp[0,len(resp[0])-1] == whale_id:
     whale_id = int(float([key for key in area_dict if area_dict[key] == list(reversed(sorted(area_dict.values())))[2]][0]))
 
 # if that area makes less than 10% of the image, we chose just the biggest one:
-if area_dict[str(float(whale_id))]/(width*height) < 0.1:
+if area_dict[str(float(whale_id))]/(width*height) < 0.15:
     whale_id = int(
         float([key for key in area_dict if area_dict[key] == list(reversed(sorted(area_dict.values())))[0]][0]))
 print(whale_id)

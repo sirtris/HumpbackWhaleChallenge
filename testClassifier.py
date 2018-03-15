@@ -5,6 +5,9 @@ from __future__ import print_function
 # Imports
 import numpy as np
 import tensorflow as tf
+from PIL import Image
+import pandas as pd
+import os
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -12,7 +15,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def cnn_model_fn(features, labels, mode):
     """Model function for CNN."""
     # Input Layer
-    input_layer = tf.reshape(features["x"], [-1, 28, 28, 1]) #replace by final image size
+    input_layer = tf.reshape(features["x"], [-1, 1050, 600, 1]) #replace by final image size
     """#Old convolutional layers
     # Convolutional Layer #1
     conv1 = tf.layers.conv2d(
@@ -38,26 +41,27 @@ def cnn_model_fn(features, labels, mode):
     # Dense Layer
     dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
     """
-    flat_input = tf.reshape(input_layer, [-1, 28 ** 2]) #TODO: replace by final dimensions
+    flat_input = tf.reshape(input_layer, [-1,1050*600]) #TODO: replace by final dimensions
+
     lin1 = tf.contrib.layers.fully_connected(
         inputs=flat_input,
-        num_outputs=28 ** 2, #TODO: replace by final dimensions
+        num_outputs=1050 *600, #TODO: replace by final dimensions
         activation_fn=tf.nn.relu,
         biases_initializer=tf.zeros_initializer()
     )
 
     lin2 = tf.contrib.layers.fully_connected(
         inputs=lin1,
-        num_outputs=28 ** 2, #TODO: replace by final dimensions
+        num_outputs=105*60, #TODO: replace by final dimensions
         activation_fn=tf.nn.relu,
         biases_initializer=tf.zeros_initializer()
     )
-    
+
     dropout = tf.layers.dropout(
         inputs=lin2, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
     # Logits Layer
-    logits = tf.layers.dense(inputs=dropout, units=10) #Set to nr of classes
+    logits = tf.layers.dense(inputs=dropout, units=200) #Set to nr of classes
 
     predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
@@ -88,17 +92,59 @@ def cnn_model_fn(features, labels, mode):
     return tf.estimator.EstimatorSpec(
         mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
+def augment_images(files, directory):
+    idealWidth = 1050
+    idealHeight = 600
+    for image in files:
+        fpath = directory + image
+        img = Image.open(fpath)
+
+        # Augment images
+        img = img.resize((idealWidth, idealHeight), Image.NEAREST)
+        img = img.convert("L")
+        #Other transformations?
+
+        img.save('altered/' + image)
+
+def image_to_float(im):
+    arr = np.array(im)
+    return [[float(x) for x in row] for row in arr]
+
+def getWhales():
+    dir = os.path.dirname(__file__)
+    train = os.listdir('data/train')
+    test = os.listdir('data/test')
+    train_dir = 'data/train/'
+    test_dir = 'data/test/'
+
+    #Import the whale data
+    #augment_images(train,train_dir) RESIZE IMAGES
+    train_df = pd.read_csv('./data/train.csv')
+    ids = train_df['Id'].values.tolist()
+    train_data = np.array([image_to_float(Image.open('altered/' + x)) for x in train[0:100]])
+    eval_data = np.array([image_to_float(Image.open('altered/' + x)) for x in train[100:200]])
+
+    #Import the data labels and convert them to integer
+    train_labels = ids[0:100]
+    eval_labels = ids[100:200]
+    unique_labels = list(set(np.concatenate((train_labels,eval_labels))))
+    n_classes = len(unique_labels)
+    train_labels_int = np.array([unique_labels.index(x) for x in train_labels]) #LABELS CONVERTED TO INTEGER SINCE STRINGS ARE NOT ACCEPTED
+    eval_labels_int = np.array([unique_labels.index(x) for x in eval_labels])
+    return train_data,train_labels_int,eval_data,eval_labels_int
+
 def main(unused_argv):
     # Load training and eval data
-    mnist = tf.contrib.learn.datasets.load_dataset("mnist") #TODO: Replice by import function of cropped whale data
+    """mnist = tf.contrib.learn.datasets.load_dataset("mnist") #TODO: Replice by import function of cropped whale data
     train_data = mnist.train.images # Returns np.array
     train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
     eval_data = mnist.test.images # Returns np.array
-    eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
+    eval_labels = np.asarray(mnist.test.labels, dtype=np.int32) """
+    train_data,train_labels,eval_data,eval_labels = getWhales()
 
     # Create the Estimator
     mnist_classifier = tf.estimator.Estimator(
-    model_fn=cnn_model_fn, model_dir="/tmp/mnist_linear")
+    model_fn=cnn_model_fn, model_dir="/tmp/whale_linear")
 
     # Set up logging for predictions
     tensors_to_log = {"probabilities": "softmax_tensor"}
@@ -114,7 +160,7 @@ def main(unused_argv):
         shuffle=True)
     mnist_classifier.train(
         input_fn=train_input_fn,
-        steps=2000,
+        steps=200,
         hooks=[logging_hook])
 
     # Evaluate the model and print results

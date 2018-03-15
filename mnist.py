@@ -52,12 +52,14 @@ def cnn_model_fn(features, labels, mode):
         activation_fn=tf.nn.relu,
         biases_initializer=tf.zeros_initializer()
     )
-
+    print(lin2.shape)
     dropout = tf.layers.dropout(
         inputs=lin2, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
-
+    print(dropout.shape)
     # Logits Layer
     logits = tf.layers.dense(inputs=dropout, units=10) #Set to nr of classes
+    print(logits.shape)
+    print(labels.shape)
 
     predictions = {
       # Generate predictions (for PREDICT and EVAL mode)
@@ -90,7 +92,7 @@ def cnn_model_fn(features, labels, mode):
 
 def main(unused_argv):
     # Load training and eval data
-    mnist = tf.contrib.learn.datasets.load_dataset("mnist") #TODO: Replice by import function of cropped whale data
+    mnist = tf.contrib.learn.datasets.load_dataset("mnist") #TODO: Replace by import function of cropped whale data
     train_data = mnist.train.images # Returns np.array
     train_labels = np.asarray(mnist.train.labels, dtype=np.int32)
     eval_data = mnist.test.images # Returns np.array

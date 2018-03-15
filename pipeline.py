@@ -10,6 +10,7 @@ import testClassifier as tc
 from PIL import Image
 
 train_df = pd.read_csv('./data/train.csv')
+print(train_df)
 
 # Get the list of train/test files
 train = os.listdir('data/train')

@@ -6,6 +6,11 @@ data/
 /.idea/
 bigfile.txt
 MNIST-data/
+/MNIST-data
+MNIST-data
+altered
+/altered
+altered/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

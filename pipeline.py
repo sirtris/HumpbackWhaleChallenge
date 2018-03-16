@@ -1,8 +1,11 @@
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+from glob import glob
 import numpy as np
-import testClassifier as tc
+import keras_cnn_classifier as cnn
+from os.path import split
+from sklearn.preprocessing import LabelEncoder
 
 #from keras.preprocessing.image import (
 #    random_rotation, random_shift, random_shear, random_zoom,
@@ -10,37 +13,37 @@ import testClassifier as tc
 from PIL import Image
 
 train_df = pd.read_csv('./data/train.csv')
-print(train_df)
 
 # Get the list of train/test files
-train = os.listdir('data/train')
-test = os.listdir('data/test')
-
+train = glob('data/train/*jpg')
+test = glob('data/test/*jpg')
 
 # train/test directories
 train_dir = 'data/train/'
 test_dir = 'data/test/'
 
+## For testing purposes
+# test dir
+t = glob('test/*jpg')
+t1 = 'test/'
+
 # For resizing
 idealWidth = 1050   
 idealHeight = 600
 
+# Augment a single image
+def augment_image(file_name):
+    # Open Image
+    img = Image.open(file_name)
 
-def augment_images(files, directory):
-    for image in files:
-        fpath = directory + image
-        img = Image.open(fpath)
+    # Augmentations
+    img = img.convert('LA')
+    img = img.resize((idealWidth, idealHeight))
+    # image = shear(image)
+    # image = shift(image)
+    #  other transformations
 
-        # Augment images
-        img = img.resize((idealWidth, idealHeight), Image.NEAREST)
-        img = img.convert("L")
-        #img = img.rotate(30, Image.NEAREST)
-
-        # image = shear(image)
-        # image = shift(image)
-        # other transformations
-
-        img.save('altered/' + image, "JPEG")
+    return np.array(img)[:, :, 0]
 
 def fakeClassify1():
     solution = []
@@ -58,7 +61,20 @@ def combine(solutions):
         result = np.append(result,np.reshape(m,(m.size,1)), axis=1) # add m to result
     return result
     
-# augment_images(train, traindir)
-s1 = classify1() #testClassify()
-s2 = s1
-print(combine([s1,s2]))
+def csv(model):
+# Write to csv and run on test set
+    with open("data/submission.csv", "w") as f:
+        f.write("Image,Id\n")
+        for image in test:
+            img = augment_image(image)
+            x = img.astype("float32")
+            # apply preprocessing to test images
+            # x = image_gen.standardize(x.reshape(1, SIZE, SIZE))
+            y = model.predict_proba(x.reshape(1, idealWidth, idealHeight, 1))
+            predicted_args = np.argsort(y)[0][::-1][:5]
+            predicted_tags = LabelEncoder().inverse_transform(predicted_args)
+            image = split(image)[-1]
+            predicted_tags = " ".join(predicted_tags)
+            f.write("%s,%s\n" % (image, predicted_tags))
+    
+csv(cnn.run())

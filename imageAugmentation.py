@@ -13,6 +13,7 @@ from keras.backend import tf as ktf
 #import os
 from PIL import Image
 from matplotlib import pyplot as plt
+import random
 #import copy
 #%% Set parameters 
 figWidth = figHeight = 9
@@ -20,9 +21,10 @@ numAugmentations = 4
 
 #%% exposed function
 
-def augment_allimages(numAugmentations=10):
+def augment_all_images(numAugmentations=10):
     # used to load images
     trainFrame = pd.read_csv("data/train.csv")
+    trainFrame = trainFrame.head(10)
     # used to keep track of new images
     augmentedFrame = pd.DataFrame(columns=['Image', 'Id'])
     # count present images
@@ -30,27 +32,64 @@ def augment_allimages(numAugmentations=10):
     idCountFrame = idCountFrame.rename(columns = {"Image":"numImages"})
     for ix, row in idCountFrame.iterrows():
         if row['numImages'] < numAugmentations:
+            print(row['Id'])
             # augment image when needed
             augment_by_Id(row['Id'], trainFrame, augmentedFrame, numAugmentations)
     # return the new ids
     return augmentedFrame
 
-augment_allimages()
+#augment_allimages()
 
 #%% Load images
 # Has to be addaped to the pipeline (not just for one certain image)
 
 def augment_by_Id(_id_, trainFrame, augFrame, numAugmentations):
+    # filteredFrame -> all images that correspond to the ID
+    # print(_id_)
     filteredFrame = trainFrame.loc[trainFrame['Id'] == _id_]
     for i in range(filteredFrame.shape[0], numAugmentations):
-        filteredFrame[0]['Id']
-        chosenImage = Image.open('./data/train/' + filteredFrame['Image'][i % filteredFrame.shape[0]])
-        augmentedImage = augment_image(chosenImage)
-        plt.imsave('/data/train/augmented/' + filteredFrame['Image'][i % filteredFrame.shape[0]][:-4] + "_" + i + ".jpg")
+        #filteredFrame[0]['Id'] # not sure about this line
+        imgFileName = filteredFrame.iloc[i % filteredFrame.shape[0]]['Image']
+        chosenImage = Image.open('./data/train/' + imgFileName) #filteredFrame['Image'][i % filteredFrame.shape[0]])
+        # print(imgFileName)
+        func_list = [rotate_image, shear_image, zoom_image, shift_image]
+        augmentedImage = augment_image(chosenImage, func_list)
+        plt.imsave('./data/train/augmented/' + imgFileName[:-4] + "_" + str(i) + ".jpg", augmentedImage)
+        augFrame.loc[augFrame.shape[0]] = [imgFileName[:-4] + "_" + str(i) + ".jpg", _id_]
+        print(augFrame)
     #augmentedFrame.loc[0] = ['sad' for n in range(2)]
     #convert image to array
     #imageArray = np.array(chosenImage)
 
+
+def augment_image(chosenImage, func_list):
+    imageArray = np.array(chosenImage)
+    return random.choice(func_list)(imageArray)
+
+def rotate_image(img_arr, rotationSize = 30): 
+    return kim.random_rotation(img_arr,rotationSize, 
+                row_axis=0, col_axis=1, channel_axis=2, fill_mode='nearest')
+    
+def shear_image(img_arr, givenIntensity = 5):
+    return kim.random_shear(img_arr, intensity= givenIntensity, 
+                 row_axis=0, col_axis=1, channel_axis=2, fill_mode='nearest')
+    
+def zoom_image(img_arr, zoomRangeWidth = 1.5, zoomRangeHeight = .7):
+    return kim.random_zoom(img_arr, zoom_range=(zoomRangeWidth,zoomRangeHeight),
+                row_axis=0, col_axis=1, channel_axis=2, fill_mode='nearest')
+    
+def shift_image(img_arr, widthRange = 0.1, heightRange = 0.3):
+    return kim.random_shift(img_arr, wrg= widthRange, hrg= heightRange, 
+                     row_axis=0, col_axis=1, channel_axis=2, fill_mode='nearest')
+
+
+
+#%%
+fullImageFilename = f'./data/train/ff38054f.jpg'
+chosenImage = Image.open(fullImageFilename)
+
+#convert image to array
+imageArray = np.array(chosenImage)
 #%% make rotation
 rotationSize = 30
 rotatedImages = [kim.random_rotation(imageArray,rotationSize, 

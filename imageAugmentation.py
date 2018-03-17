@@ -7,7 +7,7 @@ Created on Wed Feb 28 10:18:44 2018
 """
 
 import numpy as np # linear algebra
-#import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import keras.preprocessing.image as kim
 from keras.backend import tf as ktf
 #import os
@@ -18,21 +18,46 @@ from matplotlib import pyplot as plt
 figWidth = figHeight = 9
 numAugmentations = 4
 
+#%% exposed function
+
+def augment_allimages(numAugmentations=10):
+    # used to load images
+    trainFrame = pd.read_csv("data/train.csv")
+    # used to keep track of new images
+    augmentedFrame = pd.DataFrame(columns=['Image', 'Id'])
+    # count present images
+    idCountFrame = trainFrame.groupby("Id",as_index = False)["Image"].count()
+    idCountFrame = idCountFrame.rename(columns = {"Image":"numImages"})
+    for ix, row in idCountFrame.iterrows():
+        if row['numImages'] < numAugmentations:
+            # augment image when needed
+            augment_by_Id(row['Id'], trainFrame, augmentedFrame, numAugmentations)
+    # return the new ids
+    return augmentedFrame
+
+augment_allimages()
+
 #%% Load images
 # Has to be addaped to the pipeline (not just for one certain image)
-fullImageFilename = f'./data/train/ff38054f.jpg'
-chosenImage = Image.open(fullImageFilename)
 
-#convert image to array
-imageArray = np.array(chosenImage)
-
-
-rotationSize = 30
+def augment_by_Id(_id_, trainFrame, augFrame, numAugmentations):
+    filteredFrame = trainFrame.loc[trainFrame['Id'] == _id_]
+    for i in range(filteredFrame.shape[0], numAugmentations):
+        filteredFrame[0]['Id']
+        chosenImage = Image.open('./data/train/' + filteredFrame['Image'][i % filteredFrame.shape[0]])
+        augmentedImage = augment_image(chosenImage)
+        plt.imsave('/data/train/augmented/' + filteredFrame['Image'][i % filteredFrame.shape[0]][:-4] + "_" + i + ".jpg")
+    #augmentedFrame.loc[0] = ['sad' for n in range(2)]
+    #convert image to array
+    #imageArray = np.array(chosenImage)
 
 #%% make rotation
+rotationSize = 30
 rotatedImages = [kim.random_rotation(imageArray,rotationSize, 
                 row_axis=0, col_axis=1, channel_axis=2, fill_mode='nearest')
                 for _ in range(numAugmentations)]
+
+plt.imsave('out.jpg', rotatedImages[0])
 
 # just needed for demonstration purposes
 fig, givenSubplots = plt.subplots(2,2)

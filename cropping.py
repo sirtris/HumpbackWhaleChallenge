@@ -8,13 +8,27 @@ import pandas as pd
 import random
 import matplotlib.image as mpimg
 import os
+from multiprocessing import Process
+import multiprocessing as mp
+import concurrent.futures
+
+
+dir = os.path.dirname(__file__)
+TRAIN_PATH = dir + "/data/train/"
+OUTPUT_PATH = dir + "/output_crp/"
 
 
 def crop_image(filename, show_panels = False):
     # First, check if the file is already cropped:
     WHALE_ID = filename.split("/")[-1]
-    if os.path.isfile(OUTPUT_PATH + 'crp_' + WHALE_ID):
-        return
+#    if os.path.isfile(OUTPUT_PATH + 'crp_' + WHALE_ID):
+#        return
+
+    dir = os.path.dirname(__file__)
+    TRAIN_PATH = dir + "/data/train/"
+    OUTPUT_PATH = dir + "/output_crp/"
+
+    filename = TRAIN_PATH+filename
 
     img_file = Image.open(filename)
     img = img_file.load()
@@ -85,7 +99,7 @@ def crop_image(filename, show_panels = False):
 
     """
     # nearest neighbour via majority vote
-    
+
     window = 3
     copy = np.zeros(shape=(len(Y), len(Y[0])))
     for index_row, row in enumerate(Y):
@@ -97,15 +111,15 @@ def crop_image(filename, show_panels = False):
                         continue
                     else:
                         votes[Y[index_row + x][index_col + y]] += 1
-    
+
             #        print(index_row)
             #        Y[index_row][index_col] = votes.index(max(votes))
             copy[index_row][index_col] = votes.index(max(votes))
     Y = copy
-    
+
     plt.subplot(3, 2, 3)
     plt.imshow(copy)
-    
+
     # do it a second time to smooth it out even more:
     copy2 = np.zeros(shape=(len(copy), len(copy[0])))
     for index_row, row in enumerate(copy):
@@ -117,11 +131,11 @@ def crop_image(filename, show_panels = False):
                         continue
                     else:
                         votes[int(copy[index_row + x][index_col + y])] += 1
-    
+
             #        print(index_row)
             #        Y[index_row][index_col] = votes.index(max(votes))
             copy2[index_row][index_col] = votes.index(max(votes))
-    
+
     plt.subplot(3, 2, 4)
     plt.imshow(copy2)
     #plt.show()
@@ -290,17 +304,36 @@ def crop_image(filename, show_panels = False):
     # The only thing left is to save the cropped image ie. c_img
     result = Image.fromarray(c_img.astype(np.uint8))
     result.save(OUTPUT_PATH + 'crp_' + WHALE_ID)
+#    with open(OUTPUT_PATH+'crp_'+WHALE_ID,'wb') as file:
+##        file.write(c_img)
+##        np.save(file,c_img)
+#        result.save(file)
+#        file.close()
+
+    return True
+
+def main():
+
+    # load all files and do automatic cropping:
+    all_imgs = os.listdir(TRAIN_PATH)[0:20]
+
+#    for progress, img in enumerate(all_imgs[0:20]):
+    #    print(progress)
+    #    p = Process(target=crop_image,args=(TRAIN_PATH+img,True))
+    #    p.start()
+    ##    p.join()
+#        crop_image(img)
+
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+
+        executor.map(crop_image,all_imgs)
+#    pool = mp.Pool()
+#    for file in all_imgs:
+
+#    pool.map(crop_image,all_imgs)
+##        print(res.get(timeout=1))
 
 
-
-# load all files and do automatic cropping:
-dir = os.path.dirname(__file__)
-TRAIN_PATH = dir + "/data/train/"
-OUTPUT_PATH = dir + "/output_crp/"
-all_imgs = os.listdir(TRAIN_PATH)
-
-for progress, img in enumerate(all_imgs[0:20]):
-    print(progress)
-    crop_image(TRAIN_PATH + img)
-
-
+if __name__ == "__main__":
+    # execute only if run as a script
+    main()

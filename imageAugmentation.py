@@ -85,7 +85,7 @@ def shift_image(img_arr, widthRange = 0.1, heightRange = 0.3):
 
 
 #%%
-fullImageFilename = f'./data/train/ff38054f.jpg'
+fullImageFilename = './data/train/ff38054f.jpg'
 chosenImage = Image.open(fullImageFilename)
 
 #convert image to array

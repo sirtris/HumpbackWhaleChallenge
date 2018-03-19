@@ -15,7 +15,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 def cnn_model_fn(features, labels, mode):
     """Model function for CNN."""
     # Input Layer
-    input_layer = tf.reshape(features["x"], [-1, 28, 28, 1]) #replace by final image size
+    input_layer = tf.reshape(features["x"], [-1, 105, 60, 1]) #replace by final image size
     """#Old convolutional layers
     # Convolutional Layer #1
     conv1 = tf.layers.conv2d(
@@ -41,18 +41,18 @@ def cnn_model_fn(features, labels, mode):
     # Dense Layer
     dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
     """
-    flat_input = tf.reshape(input_layer, [-1,28*28]) #TODO: replace by final dimensions
+    flat_input = tf.reshape(input_layer, [-1,105*60]) #TODO: replace by final dimensions
 
     lin1 = tf.contrib.layers.fully_connected(
         inputs=flat_input,
-        num_outputs=28 *28, #TODO: replace by final dimensions
+        num_outputs=105 *60, #TODO: replace by final dimensions
         activation_fn=tf.nn.relu,
         biases_initializer=tf.zeros_initializer()
     )
 
     lin2 = tf.contrib.layers.fully_connected(
         inputs=lin1,
-        num_outputs=28*28, #TODO: replace by final dimensions
+        num_outputs=105*60, #TODO: replace by final dimensions
         activation_fn=tf.nn.relu,
         biases_initializer=tf.zeros_initializer()
     )
@@ -93,8 +93,8 @@ def cnn_model_fn(features, labels, mode):
         mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 def augment_images(files, directory):
-    idealWidth = 1050
-    idealHeight = 600
+    idealWidth = 105
+    idealHeight = 60
     for image in files:
         fpath = directory + image
         img = Image.open(fpath)
@@ -108,7 +108,7 @@ def augment_images(files, directory):
 
 def image_to_float(im):
     arr = np.array(im)
-    return [[float(x) for x in row[0:28]] for row in arr[0:28]]
+    return [[float(x) for x in row] for row in arr]
 
 def getWhales():
     dir = os.path.dirname(__file__)
@@ -118,7 +118,7 @@ def getWhales():
     test_dir = 'data/test/'
 
     #Import the whale data
-    #augment_images(train,train_dir) #RESIZE IMAGES
+    augment_images(train,train_dir) #RESIZE IMAGES
     train_df = pd.read_csv('./data/train.csv')
     ids = train_df['Id'].values.tolist()
     train_data = np.array([image_to_float(Image.open('altered/' + x)) for x in train[0:100]])
@@ -144,7 +144,7 @@ def main(unused_argv):
 
     # Create the Estimator
     mnist_classifier = tf.estimator.Estimator(
-    model_fn=cnn_model_fn, model_dir="/tmp/whale_linear")
+    model_fn=cnn_model_fn, model_dir="/tmp/whale_linear2")
 
     # Set up logging for predictions
     tensors_to_log = {"probabilities": "softmax_tensor"}

@@ -99,6 +99,10 @@ def run():
     
     # Create model and add layers
     model = Sequential()
+    #Linear model: comment following layers until dropout and uncomment the next three
+    #model.add(Dense(64, activation='relu'))
+    #model.add(Dense(32, activation='relu'))
+    #model.add(Dense(16, activation='relu'))
     model.add(Conv2D(48, kernel_size=(3, 3),
                      activation='relu',
                      input_shape=input_shape))

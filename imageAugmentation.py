@@ -24,7 +24,7 @@ import random
 def augment_all_images(numAugmentations=10):
     # used to load images
     trainFrame = pd.read_csv("data/train.csv")
-    #trainFrame = trainFrame.head(10)
+    trainFrame = trainFrame.head(100)
     # used to keep track of new images
     augmentedFrame = pd.DataFrame(columns=['Image', 'Id'])
     # count present images
@@ -32,10 +32,11 @@ def augment_all_images(numAugmentations=10):
     idCountFrame = idCountFrame.rename(columns = {"Image":"numImages"})
     for ix, row in idCountFrame.iterrows():
         if row['numImages'] < numAugmentations:
-            print(row['Id'])
             # augment image when needed
-            augment_by_Id(row['Id'], trainFrame, augmentedFrame, numAugmentations)
+            partFrame = augment_by_Id(row['Id'], trainFrame, augmentedFrame, numAugmentations)
+            augmentedFrame.append(partFrame)
     # return the new ids
+    augmentedFrame.to_csv('./data/train/augmented/aug.csv', sep =';', index = False)
     return augmentedFrame
 
 #augment_allimages()
@@ -56,7 +57,7 @@ def augment_by_Id(_id_, trainFrame, augFrame, numAugmentations):
         augmentedImage = augment_image(chosenImage, func_list)
         plt.imsave('./data/train/augmented/' + imgFileName[:-4] + "_" + str(i) + ".jpg", augmentedImage)
         augFrame.loc[augFrame.shape[0]] = [imgFileName[:-4] + "_" + str(i) + ".jpg", _id_]
-        print(augFrame)
+    return augFrame
     #augmentedFrame.loc[0] = ['sad' for n in range(2)]
     #convert image to array
     #imageArray = np.array(chosenImage)
@@ -176,4 +177,6 @@ for i in range(len(imgs)):
 
 '''
 if __name__ == '__main__':
-    augment_all_images()
+    
+    augment_all_images(15)
+    

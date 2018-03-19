@@ -16,15 +16,15 @@ from matplotlib import pyplot as plt
 import random
 #import copy
 #%% Set parameters 
-figWidth = figHeight = 9
-numAugmentations = 4
+#figWidth = figHeight = 9
+#numAugmentations = 4
 
 #%% exposed function
 
 def augment_all_images(numAugmentations=10):
     # used to load images
     trainFrame = pd.read_csv("data/train.csv")
-    trainFrame = trainFrame.head(10)
+    #trainFrame = trainFrame.head(10)
     # used to keep track of new images
     augmentedFrame = pd.DataFrame(columns=['Image', 'Id'])
     # count present images
@@ -64,6 +64,9 @@ def augment_by_Id(_id_, trainFrame, augFrame, numAugmentations):
 
 def augment_image(chosenImage, func_list):
     imageArray = np.array(chosenImage)
+    if len(imageArray.shape) == 2:
+        arrays = [imageArray for _ in range(3)]
+        imageArray = np.stack(arrays, axis=2)
     return random.choice(func_list)(imageArray)
 
 def rotate_image(img_arr, rotationSize = 30): 
@@ -83,9 +86,9 @@ def shift_image(img_arr, widthRange = 0.1, heightRange = 0.3):
                      row_axis=0, col_axis=1, channel_axis=2, fill_mode='nearest')
 
 
-
+'''
 #%%
-fullImageFilename = f'./data/train/ff38054f.jpg'
+fullImageFilename = './data/train/ff38054f.jpg'
 chosenImage = Image.open(fullImageFilename)
 
 #convert image to array
@@ -170,3 +173,7 @@ fig, givenSubplots = plt.subplots(2,2)
 fig.set_size_inches(figWidth,figHeight)
 for i in range(len(imgs)):
     givenSubplots[int(i / 2),i % 2].imshow(imgs[i])
+
+'''
+if __name__ == '__main__':
+    augment_all_images()

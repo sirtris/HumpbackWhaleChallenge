@@ -21,8 +21,8 @@ OUTPUT_PATH = dir + "/output_crp/"
 def crop_image(filename, show_panels = False):
     # First, check if the file is already cropped:
     WHALE_ID = filename.split("/")[-1]
-#    if os.path.isfile(OUTPUT_PATH + 'crp_' + WHALE_ID):
-#        return
+    if os.path.isfile(OUTPUT_PATH + 'crp_' + WHALE_ID):
+        return
 
     dir = os.path.dirname(__file__)
     TRAIN_PATH = dir + "/data/train/"

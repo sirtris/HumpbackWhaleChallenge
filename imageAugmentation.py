@@ -24,7 +24,7 @@ import random
 def augment_all_images(numAugmentations=10):
     # used to load images
     trainFrame = pd.read_csv("data/train.csv")
-    trainFrame = trainFrame.head(100)
+    #trainFrame = trainFrame.head(100)
     # used to keep track of new images
     augmentedFrame = pd.DataFrame(columns=['Image', 'Id'])
     # count present images
@@ -32,6 +32,8 @@ def augment_all_images(numAugmentations=10):
     idCountFrame = idCountFrame.rename(columns = {"Image":"numImages"})
     for ix, row in idCountFrame.iterrows():
         if row['numImages'] < numAugmentations:
+            if ix % 10 == 0:
+                print(ix)
             # augment image when needed
             partFrame = augment_by_Id(row['Id'], trainFrame, augmentedFrame, numAugmentations)
             augmentedFrame.append(partFrame)
@@ -48,12 +50,12 @@ def augment_by_Id(_id_, trainFrame, augFrame, numAugmentations):
     # filteredFrame -> all images that correspond to the ID
     # print(_id_)
     filteredFrame = trainFrame.loc[trainFrame['Id'] == _id_]
+    func_list = [rotate_image, shear_image, zoom_image]#, shift_image]
     for i in range(filteredFrame.shape[0], numAugmentations):
         #filteredFrame[0]['Id'] # not sure about this line
         imgFileName = filteredFrame.iloc[i % filteredFrame.shape[0]]['Image']
         chosenImage = Image.open('./data/train/' + imgFileName) #filteredFrame['Image'][i % filteredFrame.shape[0]])
         # print(imgFileName)
-        func_list = [rotate_image, shear_image, zoom_image, shift_image]
         augmentedImage = augment_image(chosenImage, func_list)
         plt.imsave('./data/train/augmented/' + imgFileName[:-4] + "_" + str(i) + ".jpg", augmentedImage)
         augFrame.loc[augFrame.shape[0]] = [imgFileName[:-4] + "_" + str(i) + ".jpg", _id_]
@@ -70,7 +72,7 @@ def augment_image(chosenImage, func_list):
         imageArray = np.stack(arrays, axis=2)
     return random.choice(func_list)(imageArray)
 
-def rotate_image(img_arr, rotationSize = 30): 
+def rotate_image(img_arr, rotationSize = 20): 
     return kim.random_rotation(img_arr,rotationSize, 
                 row_axis=0, col_axis=1, channel_axis=2, fill_mode='nearest')
     

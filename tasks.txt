@@ -14,3 +14,10 @@ Clustering algorthm: christopher
 Color: RGB, saturation/hue classification? Can we use this? Jelmer
 K-means, a variation? christopher
 Edge-detection. Tristan
+
+Christopher: SVM
+Adam: CNN
+Jelmer: Look into NN structures
+Tristan & mathis: similarity
+Valentin: copy top results
+Theo: feature detection

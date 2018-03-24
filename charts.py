@@ -32,6 +32,12 @@ def main():
     idCountFrame = trainFrame.groupby("Id",as_index = False)["Image"].count()
     idCountFrame = idCountFrame.rename(columns = {"Image":"numImages"})
     class_sizes = idCountFrame.values[:,1].tolist()
+    plt.hist(sorted(class_sizes)[0:-1],bins=range(0,unique_ids-1))
+    plt.title('Class size distribution in the training set without "New whale"')
+    plt.xlabel('classes')
+    plt.ylabel('size')
+    plt.show()
+    plt.savefig('class_sizes2.png');plt.clf()
     print('Average class size = ' + str(sum(class_sizes)/unique_ids))
     plt.plot(range(0,unique_ids),sorted(class_sizes))
     plt.title('Class size distribution in the training set')
@@ -39,11 +45,7 @@ def main():
     plt.ylabel('size')
     plt.savefig('class_sizes.png');plt.clf()
     #Plot nr of images per category without "New whale"
-    plt.plot(range(0,unique_ids-1),sorted(class_sizes)[:-1])
-    plt.title('Class size distribution in the training set without "New whale"')
-    plt.xlabel('classes')
-    plt.ylabel('size')
-    plt.savefig('class_sizes2.png');plt.clf()
+
 
     #Plot logarithmic distribution of images per category
     idCountFrame["density"] = idCountFrame["numImages"] / np.sum(idCountFrame["numImages"])

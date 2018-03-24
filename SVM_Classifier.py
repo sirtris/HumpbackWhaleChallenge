@@ -8,7 +8,7 @@ from sklearn.model_selection import cross_val_score
 
 dir = os.path.dirname(__file__)
 TRAIN_PATH = dir + "/data/train/"
-TEST_AMOUNT = 100
+TEST_AMOUNT = 100 # len(os.listdir(TRAIN_PATH))
 all_imgs = os.listdir(TRAIN_PATH)[0:TEST_AMOUNT]
 
 clf = svm.SVC()
@@ -42,6 +42,19 @@ def eval_pred(Y, labels):
     return good, bad
 
 
+def extract_features_from_original(data):
+    out = open("original_features.csv", 'w')
+    out.write("id;width;height;dimensions;mean_rgb;min_rgb;max_rgb;\n")
+    for index, line in enumerate(data):
+        print(index)
+        features = extract_features([line])
+        out.write(line + ";")
+        for f in features[0]:
+            out.write(str(int(f)) + ";")
+        out.write("\n")
+
+
+
 def run(data):
     print("extract features...")
     features = extract_features(data)
@@ -51,8 +64,8 @@ def run(data):
     clf.fit(features, labels)
     print("start predicting...")
     Y = clf.predict(features)
-    print(eval_pred(Y, labels))#, cross_val_score(clf, features, labels, cv = 2))
+    print(eval_pred(Y, labels))
 
 
-
+# extract_features_from_original(all_imgs)
 run(all_imgs)

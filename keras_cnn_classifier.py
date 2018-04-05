@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from glob import glob
 from PIL import Image
 import matplotlib.pylab as plt
@@ -15,6 +14,7 @@ from subprocess import check_output
 #print(check_output(["ls", "data"]).decode("utf8"))
 
 import keras
+import models
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
@@ -112,19 +112,7 @@ print('x_train shape:', x_train.shape)
 print(x_train.shape[0], 'train samples')
 
 # Create model and add layers
-model = Sequential()
-model.add(Conv2D(48, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(48, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(48, (5, 5), activation='relu'))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(Dropout(0.33))
-model.add(Flatten())
-model.add(Dense(24, activation='relu'))
-model.add(Dropout(0.33))
-model.add(Dense(num_classes, activation='softmax'))
+model = models.linearNetwork(input_shape,num_classes)
 
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adadelta(),

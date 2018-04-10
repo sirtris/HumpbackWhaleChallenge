@@ -10,7 +10,7 @@ import pandas as pd
 #import re
 
 def import_training_data():
-    return pd.read_pickle('training_input.gz')
+    return pd.read_pickle('IO/training_input.gz')
     
     
 

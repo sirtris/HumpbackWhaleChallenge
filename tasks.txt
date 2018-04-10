@@ -1,3 +1,9 @@
+Valentin + Christopher: Tail detection
+Tristan + Mathis: Tail dectection
+Jelmer: edge-detection
+Classification: Adam + Theo
+
+
 Resize images + greyscale + remove borders text 2: Valentin + Christopher 
 transform images to get a more equal  distribution 2: Tristan and Mathis (done)
 Setup the pipeline (already make predictions) 1: Adam

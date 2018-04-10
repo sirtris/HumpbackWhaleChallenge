@@ -11,6 +11,8 @@ MNIST-data
 altered
 /altered
 altered/
+output_crp/
+output_crp.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

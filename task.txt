@@ -1,4 +1,0 @@
-Valentin + Christopher: Tail detection
-Tristan + Mathis: Tail dectection
-Jelmer: edge-detection
-Classification: Adam + Theo

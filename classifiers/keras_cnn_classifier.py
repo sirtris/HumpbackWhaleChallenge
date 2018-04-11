@@ -2,19 +2,9 @@ import numpy as np
 import pandas as pd
 from glob import glob
 from PIL import Image
-import matplotlib.pylab as plt
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
-from sklearn.model_selection import train_test_split
-import warnings
 from os.path import split
-import os
-
-
-from subprocess import check_output
-#print(check_output(["ls", "data"]).decode("utf8"))
-
 import keras
-import models
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
@@ -31,11 +21,6 @@ test = glob('data/test/*jpg')
 # train/test directories
 train_dir = 'data/train/'
 test_dir = 'data/test/'
-
-## For testing purposes
-# test dir
-t = glob('test/*jpg')
-t1 = 'test/'
 
 # For resizing: can change later
 #idealWidth = 64
@@ -112,11 +97,23 @@ print('x_train shape:', x_train.shape)
 print(x_train.shape[0], 'train samples')
 
 # Create model and add layers
-model = models.linearNetwork(input_shape,num_classes)
+model = Sequential()
+model.add(Conv2D(48, kernel_size=(3, 3),
+                 activation='relu',
+                 input_shape=input_shape))
+model.add(Conv2D(48, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(48, (5, 5), activation='relu'))
+model.add(MaxPooling2D(pool_size=(3, 3)))
+model.add(Dropout(0.33))
+model.add(Flatten())
+model.add(Dense(24, activation='relu'))
+model.add(Dropout(0.33))
+model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adadelta(),
-        metrics=['accuracy'])
+              metrics=['accuracy'])
 model.summary()
 model.fit_generator(image_gen.flow(x_train, y_train.toarray(), batch_size=batch_size),
           steps_per_epoch=5,
@@ -127,9 +124,9 @@ score = model.evaluate(x_train, y_train, verbose=0)
 print('Training loss: {0:.4f}\nTraining accuracy:  {1:.4f}'.format(*score))
 
 
-# Write to csv and run on test set
-with open("data/submission.csv", "w") as f:
-    f.write("Image,Id\n")
+#Returns image and top 5 predictions as a nested list
+def run():
+    preds = []
     for image in test:
         img = augment_image(image)
         x = img.astype("float32")
@@ -141,4 +138,10 @@ with open("data/submission.csv", "w") as f:
         predicted_tags = lohe.inverse_labels(predicted_args)
         image = split(image)[-1]
         predicted_tags = " ".join(predicted_tags)
-        f.write("%s,%s\n" % (image, predicted_tags))
+        lst = [image, predicted_tags]
+        preds.append(lst)
+    return preds
+
+
+#x = run()
+#print(x)

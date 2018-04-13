@@ -1,11 +1,12 @@
 from sklearn.model_selection import cross_val_score
 
-def cross_val(clf, df, nfolds = 10):
+
+def cross_val(clf, data, labels, nfolds = 10):
     # IMPORTANT: clf should have a .fit and a .predict function! data should be a dictionary with ['data'] as raw data
     # entry (for example a matrix with a lot of numbers).
-    error_msg = "IMPORTANT: clf should have a .fit and a .predict function! df should be a pandas.dataframe with columns ['data'] , as raw data entry (for example a matrix with a lot of numbers), and ['Id'] (= labels)."
+    error_msg = "IMPORTANT: clf should have a .fit and a .predict function! data should be a matrix that represents the data (for example a feature matrix), and labels a vector with the corressponding labels."
     try:
-        return cross_val_score(clf, df, df['labels'].tolist(), cv=nfolds)
+        return cross_val_score(clf, data, labels, cv=nfolds)
     except:
         print(error_msg)
 
@@ -35,6 +36,6 @@ if __name__ == '__main__':
     from sklearn.ensemble import RandomForestClassifier
     clf = RandomForestClassifier(max_depth=15, random_state=0)
 
-    print(cross_val(clf, data, nfolds=10))
+    print(cross_val(clf, data['data'], data['labels'], nfolds=10))
 
 

@@ -9,11 +9,16 @@ from time import time
 from sklearn.ensemble import RandomForestClassifier
 
 dir = os.path.dirname(__file__)
-TRAIN_PATH = "D:/output_crp/"# dir + "/data/train/"
+TRAIN_PATH = "D:/"# dir + "/data/train/"
 TEST_AMOUNT = 50000 # len(os.listdir(TRAIN_PATH))
 all_imgs = os.listdir(TRAIN_PATH)[0:TEST_AMOUNT]
 
-clf = svm.SVC(kernel='rbf')
+
+"""
+code for when the import data works:
+from IO
+
+"""
 
 """
 SVM:
@@ -71,24 +76,28 @@ def get_original_features():
     return original_features
 
 
-def extract_features(data, original_features = {}):
+def extract_features(data, original_features = {}, path = "D:/"):
+    original_features = get_original_features()
     features = []
     for img_path in data:
         feature_row = []
-        img_full_path = TRAIN_PATH + img_path
-        img_file = misc.imread(img_full_path)
-        whale_id = img_path.split(".")[0].split("_")[1]
-        if whale_id in original_features:
-            feature_row += [original_features[whale_id]["height"], original_features[whale_id]["width"], original_features[whale_id]["dimension"], original_features[whale_id]["mean_rgb"], original_features[whale_id]["min_rgb"], original_features[whale_id]["max_rgb"]]
-        else:
-            feature_row += [0,0,0,0,0,0]
-        shape = img_file.shape
-        if len(shape) == 2:
-            feature_row += [shape[0], shape[1], 1]
-        else:
-            feature_row += [shape[0], shape[1], shape[2]]
-        feature_row += [img_file.mean(), img_file.min(), img_file.max()]
-        features.append(feature_row)
+        img_full_path = path + img_path
+        try:
+            img_file = misc.imread(img_full_path)
+            whale_id = img_path.split(".")[0].split("_")[1]
+            if whale_id in original_features:
+                feature_row += [original_features[whale_id]["height"], original_features[whale_id]["width"], original_features[whale_id]["dimension"], original_features[whale_id]["mean_rgb"], original_features[whale_id]["min_rgb"], original_features[whale_id]["max_rgb"]]
+            else:
+                feature_row += [0,0,0,0,0,0]
+            shape = img_file.shape
+            if len(shape) == 2:
+                feature_row += [shape[0], shape[1], 1]
+            else:
+                feature_row += [shape[0], shape[1], shape[2]]
+            feature_row += [img_file.mean(), img_file.min(), img_file.max()]
+            features.append(feature_row)
+        except:
+            print("file", img_path, "does not exist.")
     return features
 
 
@@ -118,6 +127,7 @@ def extract_features_from_original(data):
 
 def run_SVM(data,original_features = {}):
     t0 = time()
+    clf = svm.SVC(kernel='rbf')
     print("extract features...")
     if original_features != {}:
         features = extract_features(data, original_features)
@@ -141,7 +151,7 @@ def run_SVM(data,original_features = {}):
     print("time:", t1-t0)
 
 
-def run_RF(data,original_features = {}):
+def run_RF(data, original_features = {}):
     t0 = time()
     print("extract features...")
     if original_features != {}:
@@ -158,7 +168,15 @@ def run_RF(data,original_features = {}):
     t1 = time()
     print("time:", t1 - t0)
 
-# extract_features_from_original(all_imgs)
 
-original_features = get_original_features()
-run_RF(all_imgs, original_features)
+def SVM(kernel = 'rbf'):
+    return svm.SVC(kernel=kernel)
+
+
+def RF(max_depth = 10, ):
+    return RandomForestClassifier(max_depth=max_depth, random_state=0)
+
+if __name__ == '__main__':
+    # extract_features_from_original(all_imgs)
+    original_features = get_original_features()
+    run_RF(all_imgs, original_features)

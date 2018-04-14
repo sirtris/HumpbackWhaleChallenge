@@ -9,7 +9,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 dir = os.path.dirname(__file__)
 TRAIN_PATH = os.path.join(dir, "../")# dir + "/data/train/"
-TEST_AMOUNT = len(os.listdir(TRAIN_PATH))
+TEST_AMOUNT = len(os.listdir(os.path.join(TRAIN_PATH,"cropped/")))
 all_imgs = os.listdir(TRAIN_PATH)[0:TEST_AMOUNT]
 
 

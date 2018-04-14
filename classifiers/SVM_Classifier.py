@@ -1,16 +1,15 @@
 import os
-from PIL import Image
+#from PIL import Image
 import pandas as pd
 from sklearn import svm
 from scipy import misc
-import numpy as np
 from sklearn.model_selection import cross_val_score
 from time import time
 from sklearn.ensemble import RandomForestClassifier
 
 dir = os.path.dirname(__file__)
-TRAIN_PATH = "D:/"# dir + "/data/train/"
-TEST_AMOUNT = 50000 # len(os.listdir(TRAIN_PATH))
+TRAIN_PATH = os.path.join(dir, "../")# dir + "/data/train/"
+TEST_AMOUNT = len(os.listdir(TRAIN_PATH))
 all_imgs = os.listdir(TRAIN_PATH)[0:TEST_AMOUNT]
 
 
@@ -63,7 +62,7 @@ For 50000 images Memory error
 
 def get_original_features():
     original_features = {}
-    data = [line.replace(";\n", "") for line in open("original_features.csv", 'r').readlines()[1:]]
+    data = [line.replace(";\n", "") for line in open(os.path.join(dir, "../IO/original_features.csv"), 'r').readlines()[1:]]
     for line in data:
         features = line.split(";")
         original_features[features[0].split(".")[0]] = {"height":     int(features[1]),
@@ -76,10 +75,10 @@ def get_original_features():
     return original_features
 
 
-def extract_features(data, original_features = {}, path = "D:/"):
+def extract_features(data, original_features = {}, path = TRAIN_PATH):
     original_features = get_original_features()
     features = []
-    for img_path in data:
+    for img_path in data[0:TEST_AMOUNT]:
         feature_row = []
         img_full_path = path + img_path
         try:
@@ -114,7 +113,7 @@ def eval_pred(Y, labels):
 
 def extract_features_from_original(data):
     # This function does not need to be run again, except you want to generate the "original_features.csv" again
-    out = open("original_features.csv", 'w')
+    out = open("../IO/original_features.csv", 'w')
     out.write("id;width;height;dimensions;mean_rgb;min_rgb;max_rgb;\n")
     for index, line in enumerate(data):
         print(index)
@@ -133,7 +132,7 @@ def run_SVM(data,original_features = {}):
         features = extract_features(data, original_features)
     else:
         features = extract_features(data)
-    train_df = pd.read_csv('./data/aug.csv')
+    train_df = pd.read_csv('./IO/aug.csv')
     labels = [label for pic, label in train_df.as_matrix()[0:TEST_AMOUNT]]
     if False:
         # This section did not use cross validation; training and testing set was the same
@@ -158,7 +157,7 @@ def run_RF(data, original_features = {}):
         features = extract_features(data, original_features)
     else:
         features = extract_features(data)
-    train_df = pd.read_csv('./data/aug.csv')
+    train_df = pd.read_csv('./IO/aug.csv')
     labels = [label for pic, label in train_df.as_matrix()[0:TEST_AMOUNT]]
     clf = RandomForestClassifier(max_depth=15, random_state=0)
     print("start CV:")

@@ -1,14 +1,14 @@
 from sklearn.model_selection import cross_val_score
-
+import traceback
 
 def cross_val(clf, data, labels, nfolds = 10):
     # IMPORTANT: clf should have a .fit and a .predict function! data should be a dictionary with ['data'] as raw data
     # entry (for example a matrix with a lot of numbers).
-    error_msg = "IMPORTANT: clf should have a .fit and a .predict function! data should be a matrix that represents the data (for example a feature matrix), and labels a vector with the corressponding labels."
+    error_msg = "IMPORTANT: clf should have a .fit and a .predict function! data should be a matrix that represents the data (for example a feature matrix), and labels a vector with the corressponding labels. \n \n(You might want to change 'labels' to 'labels[0:TEST_AMOUNT]' in the call 'scores = cross_val(classifier, features, labels, nfolds=4)')"
     try:
         return cross_val_score(clf, data, labels, cv=nfolds)
-    except:
-        print(error_msg)
+    except :
+        print(traceback.format_exc() + '\n' + error_msg)
 
 
 

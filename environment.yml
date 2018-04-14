@@ -6,3 +6,4 @@ dependencies:
 - keras
 - matplotlib
 - scipy
+- pillow

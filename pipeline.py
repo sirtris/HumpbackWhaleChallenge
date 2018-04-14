@@ -2,7 +2,7 @@ from IO.import_data import import_training_data
 from IO.cross_val import cross_val
 import classifiers.SVM_Classifier as clf
 
-import IO.write_csv as write
+#import IO.write_csv as write
 
 
 def main():

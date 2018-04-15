@@ -6,11 +6,10 @@ def cross_val(clf, data, labels, nfolds = 10):
     # entry (for example a matrix with a lot of numbers).
     error_msg = "IMPORTANT: clf should have a .fit and a .predict function! data should be a matrix that represents the data (for example a feature matrix), and labels a vector with the corressponding labels. \n \n(You might want to change 'labels' to 'labels[0:TEST_AMOUNT]' in the call 'scores = cross_val(classifier, features, labels, nfolds=4)')"
     try:
+        print("test")
         return cross_val_score(clf, data, labels, cv=nfolds)
     except :
         print(traceback.format_exc() + '\n' + error_msg)
-
-
 
 if __name__ == '__main__':
     # example code how to use the cross_val function:

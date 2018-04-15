@@ -9,8 +9,18 @@ from sklearn.ensemble import RandomForestClassifier
 
 dir = os.path.dirname(__file__)
 TRAIN_PATH = os.path.join(dir, "../")# dir + "/data/train/"
-TEST_AMOUNT = len(os.listdir(os.path.join(TRAIN_PATH,"cropped/")))
+TEST_AMOUNT = 500 #len(os.listdir(os.path.join(TRAIN_PATH,"cropped/")))
 all_imgs = os.listdir(TRAIN_PATH)[0:TEST_AMOUNT]
+
+"""
+ValueError: Found input variables with inconsistent numbers of samples: [64636, 64681]
+64636 = len(os.listdir(os.path.join(TRAIN_PATH,"cropped/"))) - 707
+(64636 = 65343 - 707)
+64681 = nr of id's
+(64681 was 64636)
+64681 = csv file
+65379 = nr of cropped images
+"""
 
 
 """
@@ -132,7 +142,7 @@ def run_SVM(data,original_features = {}):
         features = extract_features(data, original_features)
     else:
         features = extract_features(data)
-    train_df = pd.read_csv('./IO/aug.csv')
+    train_df = pd.read_csv('../IO/aug.csv')
     labels = [label for pic, label in train_df.as_matrix()[0:TEST_AMOUNT]]
     if False:
         # This section did not use cross validation; training and testing set was the same
@@ -157,7 +167,7 @@ def run_RF(data, original_features = {}):
         features = extract_features(data, original_features)
     else:
         features = extract_features(data)
-    train_df = pd.read_csv('./IO/aug.csv')
+    train_df = pd.read_csv('../IO/aug.csv')
     labels = [label for pic, label in train_df.as_matrix()[0:TEST_AMOUNT]]
     clf = RandomForestClassifier(max_depth=15, random_state=0)
     print("start CV:")

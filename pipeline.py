@@ -10,8 +10,10 @@ def main():
     classifier = clf.RF(max_depth=2)                            # set classifier to the classifier of your choice
     features = clf.extract_features(dataframe['Image'])         # extract features if necessary
     labels = dataframe['Id'].tolist()                           # extract the labels from the dataframe
-    scores = cross_val(classifier, features, labels, nfolds=4) # use cross validation if necessary
+    scores = cross_val(classifier, features, labels[0:500], nfolds=4) # use cross validation if necessary
     print(scores)
+    
+    
     """
     trim_data = classifier.extract(dataframe)
     scores = cross_val_score(classifier,trim_data,10)

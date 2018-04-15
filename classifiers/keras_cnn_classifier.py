@@ -8,19 +8,21 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
-from keras import backend as K
+#from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator
 
 
-train_df = pd.read_csv('./data/train.csv')
+train_df = pd.read_csv('./IO/cropped.csv', sep=';')
+train_df = train_df[0:100] #only for testing
 
 # Get the list of train/test files
-train = glob('data/train/*jpg')
-test = glob('data/test/*jpg')
+train = glob('cropped/*jpg')
+train = train[0:100] #only for testing
+#test = glob('data/test/*jpg')
 
 # train/test directories
-train_dir = 'data/train/'
-test_dir = 'data/test/'
+train_dir = 'cropped/'
+#test_dir = 'data/test/'
 
 # For resizing: can change later
 #idealWidth = 64
@@ -43,7 +45,7 @@ def augment_image(file_name):
     return np.array(img)[:, :, 0]
 
 
-train_df["Image"] = train_df["Image"].map(lambda a: "data/train/"+a)
+train_df["Image"] = train_df["Image"].map(lambda a: "cropped/"+a)
 ImageToLabelDict = dict(zip(train_df["Image"], train_df["Id"]))
 
 train_img = np.array([augment_image(img) for img in train])
@@ -68,9 +70,15 @@ class LabelOneHotEncoder():
         return self.le.inverse_transform(x)
 
 
+read_the_comments_below #comment this (this is just to draw your attention)
+#This list(map()) function doesnt work WORK???
 y = list(map(ImageToLabelDict.get, train))
+#y is here: [None, None, None, None, None, None, None, None, None, ..., None]
+
 lohe = LabelOneHotEncoder()
+print(y)
 y_cat = lohe.fit_transform(y)
+
 
 x = x.reshape((-1, SIZE, SIZE, 1))
 input_shape = x[0].shape
@@ -125,7 +133,7 @@ print('Training loss: {0:.4f}\nTraining accuracy:  {1:.4f}'.format(*score))
 
 
 #Returns image and top 5 predictions as a nested list
-def run():
+def predict():
     preds = []
     for image in test:
         img = augment_image(image)

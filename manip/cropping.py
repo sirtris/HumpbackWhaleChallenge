@@ -19,7 +19,7 @@ OUTPUT_PATH = dir + "/output_crp/"
 
 
 def crop_image(filename, show_panels = False):
-    dir = os.path.dirname(__file__)
+    dir = "D:\RU\Sem2\MLiP\Comp1\HumpbackWhaleChallenge"
     TRAIN_PATH = dir + "/data/train/"
     OUTPUT_PATH = dir + "/output_crp/"
     # First, check if the file is already cropped:
@@ -46,7 +46,7 @@ def crop_image(filename, show_panels = False):
     else:
         for x in range(0, width):
             for y in range(0, height):
-                X[x,y] = img[x,y]
+                X[x,y] = img[x,y][0:3]
 
     X = np.array(X)
 
@@ -226,7 +226,8 @@ def crop_image(filename, show_panels = False):
     whale_id = int(float([key for key in area_dict if area_dict[key] == reversed_area_ranking[1]][0]))
 
     # if that id is at the top left and top right, it cannot be the whale, so we chose the third biggest area:
-    if resp[0,0] == whale_id and resp[0,len(resp[0])-1] == whale_id:
+    if resp[0,0] == whale_id and resp[0,len(resp[0])-1] == whale_id and len(area_dict) > 2:
+        print(reversed_area_ranking)
         whale_id = int(float([key for key in area_dict if area_dict[key] == reversed_area_ranking[2]][0]))
 
     # if that area makes less than 10% of the image, we chose just the biggest one:

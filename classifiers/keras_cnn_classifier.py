@@ -12,21 +12,14 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.preprocessing.image import ImageDataGenerator
 
 
-train_df = pd.read_csv('./IO/cropped.csv', sep=';')
-train_df = train_df[0:100] #only for testing
+train_df = pd.read_csv('../IO/cropped.csv', sep=';')
 
 # Get the list of train/test files
-train = glob('cropped/*jpg')
-train = train[0:100] #only for testing
-#test = glob('data/test/*jpg')
+train = glob('data/output_crp/*jpg')
+test = glob('data/test/*jpg')
 
-# train/test directories
-train_dir = 'cropped/'
-#test_dir = 'data/test/'
 
 # For resizing: can change later
-#idealWidth = 64
-#idealHeight = 64
 SIZE = 64
 
 
@@ -38,14 +31,11 @@ def augment_image(file_name):
     # Augmentations
     img = img.convert('LA')
     img = img.resize((SIZE, SIZE))
-    # image = shear(image)
-    # image = shift(image)
-    #  other transformations
 
     return np.array(img)[:, :, 0]
 
 
-train_df["Image"] = train_df["Image"].map(lambda a: "cropped/"+a)
+train_df["Image"] = train_df["Image"].map(lambda a: "output_crp/"+a)
 ImageToLabelDict = dict(zip(train_df["Image"], train_df["Id"]))
 
 train_img = np.array([augment_image(img) for img in train])
@@ -70,13 +60,14 @@ class LabelOneHotEncoder():
         return self.le.inverse_transform(x)
 
 
-read_the_comments_below #comment this (this is just to draw your attention)
-#This list(map()) function doesnt work WORK???
 y = list(map(ImageToLabelDict.get, train))
-#y is here: [None, None, None, None, None, None, None, None, None, ..., None]
+
+#Replace None types with new_whale in list
+for im in range(len(y)):
+    if y[im] is None:
+        y[im] = 'new_whale'
 
 lohe = LabelOneHotEncoder()
-print(y)
 y_cat = lohe.fit_transform(y)
 
 
@@ -99,7 +90,7 @@ image_gen.fit(x_train, augment=True)
 
 batch_size = 128
 num_classes = len(y_cat.toarray()[0])
-epochs = 5
+epochs = 9
 
 print('x_train shape:', x_train.shape)
 print(x_train.shape[0], 'train samples')
@@ -124,7 +115,7 @@ model.compile(loss=keras.losses.categorical_crossentropy,
               metrics=['accuracy'])
 model.summary()
 model.fit_generator(image_gen.flow(x_train, y_train.toarray(), batch_size=batch_size),
-          steps_per_epoch=5,
+          steps_per_epoch=x_train.shape[0]//batch_size,
           epochs=epochs,
           verbose=1)
 
@@ -133,7 +124,7 @@ print('Training loss: {0:.4f}\nTraining accuracy:  {1:.4f}'.format(*score))
 
 
 #Returns image and top 5 predictions as a nested list
-def predict():
+def run():
     preds = []
     for image in test:
         img = augment_image(image)
